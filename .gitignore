@@ -1,0 +1,35 @@
+# Python virtual environment
+venv/
+.venv/
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Google credentials
+credentials/
+*.json
+
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Node
+node_modules/
+
+# React / Next build
+dist/
+build/
+.next/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log

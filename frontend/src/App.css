@@ -216,6 +216,19 @@ body {
   transition: 0.2s;
 }
 
+.photo-button {
+  width: 50px !important;
+  min-width: 50px;
+  border: 1px solid #ddd !important;
+  background: #f8f9fa !important;
+  color: #222 !important;
+  font-size: 20px;
+}
+
+.photo-button:hover {
+  background: #eeeeee !important;
+}
+
 .chat-input-container button:hover {
   opacity: 0.85;
 }

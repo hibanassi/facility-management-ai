@@ -84,6 +84,7 @@ CATEGORY_RULES = {
         "climatisation",
         "climatiseur",
         "clim",
+        "clima",
         "chauffage",
         "ventilation",
         "air conditioning",
@@ -99,13 +100,25 @@ CATEGORY_RULES = {
         "evier",
         "lavabo",
         "chasse d'eau",
+        "chasse",
+        "leau",
+        "l'eau",
+        "l'ingette",
+        "lingette",
+        "savon",
         "wc bouche",
         "toilette bouchee",
+        "toilette bouche",
+        "toillette bouchee",
+        "toillete bouche",
+        "toilette bouche",
         "pression d'eau"
     ],
 
     "ELECTRICAL": [
         "electricite",
+        "circuit",
+        "cable",
         "prise electrique",
         "prise",
         "courant",
@@ -173,6 +186,7 @@ CATEGORY_RULES = {
     "SECURITY": [
         "badge",
         "acces",
+        "pointage",
         "securite",
         "camera",
         "intrusion",
@@ -190,6 +204,7 @@ CATEGORY_RULES = {
         "porte cassee",
         "porte endommagee",
         "fenetre cassee",
+        "ma chaise est casee",
         "chaise casse"
     ],
 
@@ -254,37 +269,60 @@ def classify_category(message: str):
 
 def is_generic_complaint(message: str) -> bool:
     """
-    Détecte une réclamation trop générale.
-
-    Une localisation seule ne permet pas de déterminer
-    la catégorie du problème.
-
-    Exemples :
-    - il ya un probleme dans les toilettes
-    - il ya un probleme dans le parking
-    - il ya un probleme dans le jardin
-    - il ya un probleme dans le couloir
-    - j'ai un probleme dans mon bureau
+    Détecte une réclamation générale qui indique seulement
+    qu'il existe un problème, sans décrire le problème réel.
     """
 
     text = normalize_text(message).strip()
 
-    # Si une catégorie réelle est déjà détectée,
-    # la réclamation n'est pas générique.
-    if classify_category(message) is not None:
-        return False
+    # Correction de quelques fautes fréquentes
+    text = text.replace("probelem", "probleme")
+    text = text.replace("problme", "probleme")
 
-    # Il faut parler d'un problème ou d'un souci.
-    if not any(
-        word in text
-        for word in [
-            "probleme",
-            "souci"
-        ]
-    ):
-        return False
+    generic_phrases = [
+        "j'ai un probleme",
+        "jai un probleme",
+        "j'ai un souci",
+        "jai un souci",
+        "un probleme",
+        "un souci",
+        "il y a un probleme",
+        "il ya un probleme",
+        "il y a un problem",
+        "il ya un problem",
+    ]
 
-    return True
+    locations = [
+        "dans mon bureau",
+        "dans le bureau",
+        "dans un bureau",
+        "au bureau",
+        "dans les toilettes",
+        "dans la toilette",
+        "aux toilettes",
+        "aux wc",
+        "dans les wc",
+        "dans le parking",
+        "au parking",
+        "dans le jardin",
+        "dans l'espace vert",
+        "dans le couloir",
+        "dans le hall",
+        "dans la cafeteria",
+        "dans la cafétéria"
+    ]
+
+    for phrase in generic_phrases:
+
+        if text == phrase:
+            return True
+
+        for location in locations:
+
+            if text == f"{phrase} {location}":
+                return True
+
+    return False
 
 # ============================================================
 # SOUS-CATEGORIE

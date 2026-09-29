@@ -1,5 +1,6 @@
 import os
 import smtplib
+import mimetypes
 from email.message import EmailMessage
 
 from dotenv import load_dotenv
@@ -66,6 +67,21 @@ def send_complaint_email(complaint):
     equipment = complaint.get("equipment", {})
     location = complaint.get("location", {})
     incident = complaint.get("incident", {})
+    photo = complaint.get("photo", {})
+    
+    photo_path = photo.get("path")
+    photo_filename = photo.get("filename")
+    photo_content_type = photo.get("content_type")
+
+    if not photo_path:
+        raise ValueError(
+            "La photo est obligatoire pour envoyer la réclamation."
+        )
+
+    if not os.path.exists(photo_path):
+        raise FileNotFoundError(
+            f"La photo de la réclamation est introuvable : {photo_path}"
+        )
 
     complaint_id = complaint.get(
         "complaint_id",
@@ -312,6 +328,30 @@ def send_complaint_email(complaint):
     message["To"] = FACILITY_MANAGEMENT_EMAIL
 
     message.set_content(body)
+    
+    # ========================================================
+    # PIECE JOINTE : PHOTO DE LA RECLAMATION
+    # ========================================================
+
+    with open(photo_path, "rb") as file:
+        photo_data = file.read()
+
+    mime_type = photo_content_type
+
+    if not mime_type:
+        mime_type, _ = mimetypes.guess_type(photo_path)
+
+    if not mime_type:
+        mime_type = "application/octet-stream"
+
+    maintype, subtype = mime_type.split("/", 1)
+
+    message.add_attachment(
+        photo_data,
+        maintype=maintype,
+        subtype=subtype,
+        filename=photo_filename or os.path.basename(photo_path)
+    )
 
     # ========================================================
     # CONNEXION GMAIL

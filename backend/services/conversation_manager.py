@@ -57,6 +57,12 @@ class ConversationManager:
                 "reported_at": None,
                 "occurred_at": None,
                 "duration": None
+            },
+            
+            "photo": {
+                "path": None,
+                "filename": None,
+                "content_type": None
             }
         }
 
@@ -69,6 +75,12 @@ class ConversationManager:
         self.saved_to_google_sheets = False
         
         self.facility_email_sent = False
+        
+        self.photo_path = None
+        
+        self.photo_filename = None
+
+        self.photo_content_type = None
 
     # MERGE
 
@@ -304,6 +316,7 @@ class ConversationManager:
             return {
                 "status": "COMPLETE",
                 "question": None,
+                "current_question_field": None,
                 "message": final_message,
                 "missing_fields": [],
                 "complaint": self.complaint
@@ -336,8 +349,34 @@ class ConversationManager:
             "status": "COLLECTING",
 
             "question": self.current_question,
+            
+            "current_question_field": self.current_question_field,
 
             "missing_fields": missing_fields,
 
             "complaint": self.complaint
         }
+    def process_photo(self, file_path, filename, content_type):
+        """
+        Enregistre la photo associée à la réclamation
+        puis reprend le traitement de la conversation.
+        """
+
+        self.photo_path = file_path
+        self.photo_filename = filename
+        self.photo_content_type = content_type
+
+        self.complaint["photo"] = {
+            "path": file_path,
+            "filename": filename,
+            "content_type": content_type
+        }
+
+        print("\n--- Photo reçue ---")
+        print(f"Nom : {filename}")
+        print(f"Type : {content_type}")
+        print(f"Chemin : {file_path}")
+
+        self.print_current_complaint()
+
+        return self._continue_conversation()

@@ -23,6 +23,10 @@ function Chatbot() {
   const [isTyping, setIsTyping] = useState(false);
   const [started, setStarted] = useState(false);
 
+  // Nouvelle variable :
+  // indique si le chatbot attend obligatoirement une photo
+  const [photoRequired, setPhotoRequired] = useState(false);
+
   // ============================================================
   // PREMIER MESSAGE
   // ============================================================
@@ -31,10 +35,6 @@ function Chatbot() {
     const newSessionId = crypto.randomUUID();
 
     setSessionId(newSessionId);
-
-    // ------------------------------------------------------------
-    // 1. AFFICHER IMMEDIATEMENT LE MESSAGE UTILISATEUR
-    // ------------------------------------------------------------
 
     const userMessage = {
       id: Date.now(),
@@ -46,10 +46,6 @@ function Chatbot() {
       ...previous,
       userMessage,
     ]);
-
-    // ------------------------------------------------------------
-    // 2. AFFICHER L'INDICATEUR DE FRAPPE
-    // ------------------------------------------------------------
 
     setIsTyping(true);
 
@@ -71,10 +67,6 @@ function Chatbot() {
         throw new Error("Erreur serveur");
       }
 
-      // ----------------------------------------------------------
-      // 3. AJOUTER LA REPONSE DU CHATBOT
-      // ----------------------------------------------------------
-
       const botMessage = {
         id: Date.now() + 1,
         sender: "bot",
@@ -91,12 +83,18 @@ function Chatbot() {
 
       setStarted(true);
 
+      // Si le backend demande une photo
+      if (
+          data.status === "COLLECTING" &&
+          data.current_question_field === "photo"
+      ) {
+          setPhotoRequired(true);
+      } else {
+          setPhotoRequired(false);
+      }
+
     } catch (error) {
       console.error(error);
-
-      // ----------------------------------------------------------
-      // MESSAGE D'ERREUR
-      // ----------------------------------------------------------
 
       setMessages((previous) => [
         ...previous,
@@ -130,7 +128,7 @@ function Chatbot() {
     }
 
     // ------------------------------------------------------------
-    // 1. AFFICHER IMMEDIATEMENT LE MESSAGE UTILISATEUR
+    // MESSAGE UTILISATEUR
     // ------------------------------------------------------------
 
     const userMessage = {
@@ -143,10 +141,6 @@ function Chatbot() {
       ...previous,
       userMessage,
     ]);
-
-    // ------------------------------------------------------------
-    // 2. AFFICHER "..."
-    // ------------------------------------------------------------
 
     setIsTyping(true);
 
@@ -168,10 +162,6 @@ function Chatbot() {
         throw new Error("Erreur serveur");
       }
 
-      // ----------------------------------------------------------
-      // 3. AJOUTER LA REPONSE DU CHATBOT
-      // ----------------------------------------------------------
-
       const botMessage = {
         id: Date.now() + 1,
         sender: "bot",
@@ -185,6 +175,19 @@ function Chatbot() {
         ...previous,
         botMessage,
       ]);
+
+      // ----------------------------------------------------------
+      // LE BACKEND DEMANDE UNE PHOTO
+      // ----------------------------------------------------------
+
+      if (
+          data.status === "COLLECTING" &&
+          data.current_question_field === "photo"
+      ) {
+          setPhotoRequired(true);
+      } else {
+          setPhotoRequired(false);
+      }
 
     } catch (error) {
       console.error(error);
@@ -204,6 +207,147 @@ function Chatbot() {
     }
   };
 
+  // ============================================================
+  // ENVOI DE LA PHOTO
+  // ============================================================
+
+  const sendPhoto = async (file) => {
+    if (!file || !sessionId) return;
+
+    // ------------------------------------------------------------
+    // Vérification du type
+    // ------------------------------------------------------------
+
+    const allowedTypes = [
+      "image/jpeg",
+      "image/png",
+      "image/webp",
+    ];
+
+    if (!allowedTypes.includes(file.type)) {
+      setMessages((previous) => [
+        ...previous,
+        {
+          id: Date.now(),
+          sender: "bot",
+          text:
+            "❌ Format non accepté. Veuillez sélectionner une image JPG, PNG ou WEBP.",
+        },
+      ]);
+
+      return;
+    }
+
+    // ------------------------------------------------------------
+    // Vérification de la taille
+    // ------------------------------------------------------------
+
+    const maxSize = 5 * 1024 * 1024; // 5 MB
+
+    if (file.size > maxSize) {
+      setMessages((previous) => [
+        ...previous,
+        {
+          id: Date.now(),
+          sender: "bot",
+          text:
+            "❌ La photo est trop volumineuse. La taille maximale est de 5 MB.",
+        },
+      ]);
+
+      return;
+    }
+
+    // ------------------------------------------------------------
+    // Afficher la photo dans la conversation
+    // ------------------------------------------------------------
+
+    const userPhotoMessage = {
+      id: Date.now(),
+      sender: "user",
+      text: `📷 ${file.name}`,
+    };
+
+    setMessages((previous) => [
+      ...previous,
+      userPhotoMessage,
+    ]);
+
+    setIsTyping(true);
+
+    try {
+      // ----------------------------------------------------------
+      // FormData pour envoyer un fichier
+      // ----------------------------------------------------------
+
+      const formData = new FormData();
+
+      formData.append("session_id", sessionId);
+      formData.append("photo", file);
+
+      const response = await fetch(`${API_URL}/chat/photo`, {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.message || "Erreur lors de l'envoi de la photo"
+        );
+      }
+
+      // ----------------------------------------------------------
+      // Réponse du chatbot
+      // ----------------------------------------------------------
+
+      const botMessage = {
+        id: Date.now() + 1,
+        sender: "bot",
+        text:
+          data.message ||
+          "📷 Photo reçue avec succès.",
+      };
+
+      setMessages((previous) => [
+        ...previous,
+        botMessage,
+      ]);
+
+      // ----------------------------------------------------------
+      // La photo n'est plus demandée
+      // ----------------------------------------------------------
+
+      setPhotoRequired(false);
+
+      // Si le backend demande encore une photo
+      if (data.current_question_field === "photo") {
+        setPhotoRequired(true);
+      }
+
+    } catch (error) {
+      console.error(error);
+
+      setMessages((previous) => [
+        ...previous,
+        {
+          id: Date.now() + 1,
+          sender: "bot",
+          text:
+            "❌ Impossible d'envoyer la photo. Veuillez réessayer.",
+        },
+      ]);
+
+    } finally {
+      setIsTyping(false);
+    }
+  };
+
+  // ============================================================
+  // INTERFACE
+  // ============================================================
+
   return (
     <div className="chat-page">
       <div className="chat-container">
@@ -217,6 +361,8 @@ function Chatbot() {
 
         <ChatInput
           onSend={sendMessage}
+          onPhotoSelect={sendPhoto}
+          photoRequired={photoRequired}
         />
 
       </div>

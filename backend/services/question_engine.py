@@ -56,18 +56,24 @@ def is_filled(value) -> bool:
 
 GENERIC_DESCRIPTIONS = [
     "j'ai un probleme",
+    "j'ai rencontré un probleme",
+    "j'ai rencontre un probleme",
+    "il ya un probleme dans mon bureau",
+    "j'ai vu un probleme",
     "jai un probleme",
     "j'ai un souci",
     "jai un souci",
     "un probleme",
     "un souci",
     "il y a un probleme",
+    "il y a un problem",
     "il y a un souci",
     "probleme dans mon bureau",
     "souci dans mon bureau",
     "il y a quelque chose qui ne va pas",
     "ca ne marche pas",
     "ça ne marche pas",
+    "ne fonctionne pas",
     "cela ne marche pas"
 ]
 
@@ -103,7 +109,7 @@ QUESTIONS = {
         "Pouvez-vous préciser quel est le problème rencontré ?",
 
     "employee.employee_id":
-        "Pouvez-vous me communiquer votre Employee ID ?",
+        "Pouvez-vous me communiquer votre Matricule ?",
 
     "employee.email":
     "Quelle est votre adresse e-mail ?",
@@ -145,7 +151,11 @@ QUESTIONS = {
         "Quel équipement est concerné ?",
 
     "incident.duration":
-        "Depuis combien de temps le problème se produit-il ?"
+        "Depuis combien de temps le problème se produit-il ?",
+        
+    "photo":
+        "Veuillez joindre une photo du problème." 
+           
 }
 
 
@@ -183,6 +193,8 @@ def determine_location_type(data: dict) -> str:
     if area in [
         "toilettes",
         "toilette",
+        "toillette",
+        "toillete",
         "wc",
         "restroom",
         "bathroom"
@@ -696,6 +708,16 @@ def get_missing_fields(data: dict) -> list[str]:
                 "incident.duration"
             )
 
+    photo = data.get(
+        "photo",
+        {}
+    )
+
+    if not photo or not photo.get("path"):
+        missing.append(
+            "photo"
+        )
+    
     # ========================================================
     # 7. SUPPRESSION DES DOUBLONS
     # ========================================================
@@ -748,7 +770,7 @@ def get_next_question(
             return (
                 "Quel est le problème rencontré dans votre bureau ? "
                 "Par exemple : climatisation, électricité, nettoyage, "
-                "équipement informatique, mobilier, etc."
+                "mobilier, etc."
             )
 
         if location_type == "restroom":

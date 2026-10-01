@@ -43,24 +43,22 @@ def save_complaint(complaint):
     Enregistre une réclamation complète dans Google Sheets.
 
     Colonnes :
+
     A - Complaint ID
     B - Date
-    C - Employee ID
-    D - Employee Email
-    E - Problem Description
-    F - Category
-    G - Subcategory
-    H - Equipment
-    I - Building
-    J - Floor
-    K - Department
-    L - Restroom Type
-    M - Specific Location
-    N - Near Department
-    O - Near Office
-    P - Duration
-    Q - Status
-    R - Resolution Email Sent
+    C - Employee Email
+    D - Problem Description
+    E - Category
+    F - Subcategory
+    G - Equipment
+    H - Department
+    I - Restroom Type
+    J - Specific Location
+    K - Near Department
+    L - Near Office
+    M - Duration
+    N - Status
+    O - Resolution Email Sent
     """
 
     worksheet = get_google_sheet()
@@ -92,54 +90,43 @@ def save_complaint(complaint):
         # B - Date
         date,
 
-        # C - Employee ID
-        employee.get("employee_id") or "",
-
-        # D - Employee Email
+        # C - Employee Email
         employee.get("email") or "",
 
-        # E - Problem Description
+        # D - Problem Description
         problem.get("description") or "",
 
-        # F - Category
+        # E - Category
         problem.get("category") or "",
 
-        # G - Subcategory
+        # F - Subcategory
         problem.get("subcategory") or "",
 
-        # H - Equipment
+        # G - Equipment
         equipment.get("type") or "",
 
-        # I - Building
-        location.get("building") or "",
-
-        # J - Floor
-        location.get("floor")
-        if location.get("floor") is not None
-        else "",
-
-        # K - Department
+        # H - Department
         location.get("department") or "",
 
-        # L - Restroom Type
+        # I - Restroom Type
         location.get("restroom_type") or "",
 
-        # M - Specific Location
+        # J - Specific Location
         location.get("specific_location") or "",
 
-        # N - Near Department
+        # K - Near Department
         location.get("near_department") or "",
 
-        # O - Near Office
+        # L - Near Office
         location.get("near_office") or "",
 
-        # P - Duration
+        # M - Duration
         incident.get("duration") or "",
 
-        # Q - Status
+        # N - Status
         complaint.get("status") or "NEW",
 
-        # R - Resolution Email Sent
+        # O - Resolution Email Sent
         "NO"
     ]
 
@@ -152,10 +139,10 @@ def save_complaint(complaint):
     next_row = len(column_a) + 1
 
     # =====================================================
-    # ECRITURE A:R
+    # ECRITURE A:P
     # =====================================================
 
-    range_name = f"A{next_row}:R{next_row}"
+    range_name = f"A{next_row}:O{next_row}"
 
     worksheet.update(
         range_name,
@@ -169,4 +156,3 @@ def save_complaint(complaint):
     )
 
     return complaint_id
-

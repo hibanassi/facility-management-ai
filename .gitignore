@@ -33,3 +33,6 @@ Thumbs.db
 
 # Logs
 *.log
+
+# Photos envoyées par les employés
+uploads/

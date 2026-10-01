@@ -1,3 +1,5 @@
+import { Bot, UserRound } from "lucide-react";
+
 function Message({ message }) {
   const isUser = message.sender === "user";
 
@@ -9,7 +11,7 @@ function Message({ message }) {
     >
       {!isUser && (
         <div className="message-avatar">
-          🤖
+          <Bot size={24} />
         </div>
       )}
 
@@ -21,7 +23,7 @@ function Message({ message }) {
 
       {isUser && (
         <div className="message-avatar user-avatar">
-          👤
+          <UserRound size={24} />
         </div>
       )}
     </div>

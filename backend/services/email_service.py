@@ -109,11 +109,6 @@ def send_complaint_email(complaint):
 
     employee_lines = []
 
-    if employee.get("employee_id"):
-        employee_lines.append(
-            f"Employee ID : {employee.get('employee_id')}"
-        )
-
     if employee.get("email"):
         employee_lines.append(
             f"Adresse e-mail : {employee.get('email')}"
@@ -195,25 +190,11 @@ def send_complaint_email(complaint):
 
     location_lines = []
 
-    if location.get("building"):
-        location_lines.append(
-            f"Bâtiment : {location.get('building')}"
-        )
-
-    if location.get("floor") is not None:
-        location_lines.append(
-            f"Étage : {location.get('floor')}"
-        )
-
     if location.get("department"):
         location_lines.append(
             f"Département : {location.get('department')}"
         )
 
-    if location.get("office"):
-        location_lines.append(
-            f"Bureau : {location.get('office')}"
-        )
 
     if location.get("area"):
         location_lines.append(

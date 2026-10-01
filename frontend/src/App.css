@@ -219,10 +219,13 @@ body {
 .photo-button {
   width: 50px !important;
   min-width: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   border: 1px solid #ddd !important;
   background: #f8f9fa !important;
   color: #222 !important;
-  font-size: 20px;
+  cursor: pointer;
 }
 
 .photo-button:hover {

@@ -108,23 +108,11 @@ QUESTIONS = {
     "problem.category":
         "Pouvez-vous préciser quel est le problème rencontré ?",
 
-    "employee.employee_id":
-        "Pouvez-vous me communiquer votre Matricule ?",
-
     "employee.email":
     "Quelle est votre adresse e-mail ?",
 
     "problem.description":
         "Pouvez-vous décrire précisément le problème rencontré ?",
-
-    "location.building":
-        "Dans quel bâtiment se trouve le problème ?",
-
-    "location.floor":
-        "À quel étage se trouve le problème ?",
-
-    "location.office":
-        "Quel est le numéro du bureau concerné ?",
         
     "location.department":
         "Dans quel département se trouve le problème ?",    
@@ -244,96 +232,64 @@ def determine_location_type(data: dict) -> str:
 BASE_REQUIRED_FIELDS = {
 
     "HVAC": [
-        "employee.employee_id",
         "employee.email",
-        "location.building",
-        "location.floor",
         "problem.description"
     ],
 
     "PLUMBING": [
-        "employee.employee_id",
         "employee.email",
-        "location.building",
-        "location.floor",
         "problem.description"
     ],
 
     "ELECTRICAL": [
-        "employee.employee_id",
         "employee.email",
-        "location.building",
-        "location.floor",
         "problem.description"
     ],
 
     "IT_EQUIPMENT": [
-        "employee.employee_id",
         "employee.email",
         "equipment.type",
-        "location.building",
-        "location.floor",
         "problem.description"
     ],
 
     "FURNITURE": [
-        "employee.employee_id",
         "employee.email",
         "equipment.type",
-        "location.building",
-        "location.floor",
         "problem.description"
     ],
 
     "CLEANING": [
-        "employee.employee_id",
         "employee.email",
-        "location.building",
-        "location.floor",
         "problem.description"
     ],
 
     "LANDSCAPING": [
-        "employee.employee_id",
         "employee.email",
         "problem.description"
     ],
 
     "PARKING": [
-        "employee.employee_id",
         "employee.email",
         "problem.description"
     ],
 
     "SECURITY": [
-        "employee.employee_id",
         "employee.email",
-        "location.building",
-        "location.floor",
         "problem.description"
     ],
 
     "CIVIL_WORKS": [
-        "employee.employee_id",
         "employee.email",
-        "location.building",
-        "location.floor",
         "problem.description"
     ],
 
     "FIRE_SAFETY": [
-        "employee.employee_id",
         "employee.email",
-        "location.building",
-        "location.floor",
         "problem.description"
     ],
 
     "OTHER": [
-        "employee.employee_id",
         "employee.email",
-        "location.building",
-        "location.floor",
         "problem.description"
     ]
 }
@@ -366,10 +322,15 @@ GENERIC_LOCATION_VALUES = [
     "jardin",
     "pelouse",
     "toilettes",
+    "toillettes",
+    "toilletes",
     "toilette",
+    "toillette",
+    "toillete",
     "wc",
     "hall",
     "couloir",
+    "couloire",
     "salle de reunion",
     "cafeteria"
 ]
@@ -434,14 +395,6 @@ def get_missing_fields(data: dict) -> list[str]:
 
     if not field_is_filled(
         data,
-        "employee.employee_id"
-    ):
-        missing.append(
-            "employee.employee_id"
-        )
-
-    if not field_is_filled(
-        data,
         "employee.email"
     ):
         missing.append(
@@ -483,30 +436,6 @@ def get_missing_fields(data: dict) -> list[str]:
     # --------------------------------------------------------
 
     if location_type == "office":
-
-        # Bâtiment
-        if not is_filled(
-            location.get("building")
-        ):
-            missing.append(
-                "location.building"
-            )
-
-        # Étage
-        if not is_filled(
-            location.get("floor")
-        ):
-            missing.append(
-                "location.floor"
-            )
-
-        # Numéro du bureau
-        if not is_filled(
-            location.get("office")
-        ):
-            missing.append(
-                "location.office"
-            )
             
         # --------------------------------------------
         # Département où se trouve le problème
@@ -524,22 +453,6 @@ def get_missing_fields(data: dict) -> list[str]:
     # --------------------------------------------------------
 
     elif location_type == "restroom":
-
-        # Bâtiment
-        if not is_filled(
-            location.get("building")
-        ):
-            missing.append(
-                "location.building"
-            )
-
-        # Étage
-        if not is_filled(
-            location.get("floor")
-        ):
-            missing.append(
-                "location.floor"
-            )
 
         # Hommes / femmes
         if not is_filled(
@@ -618,20 +531,6 @@ def get_missing_fields(data: dict) -> list[str]:
 
     elif location_type == "common_area":
 
-        if not is_filled(
-            location.get("building")
-        ):
-            missing.append(
-                "location.building"
-            )
-
-        if not is_filled(
-            location.get("floor")
-        ):
-            missing.append(
-                "location.floor"
-            )
-
         if not (
             is_precise_location(
                 location.get("specific_location")
@@ -658,20 +557,6 @@ def get_missing_fields(data: dict) -> list[str]:
     # --------------------------------------------------------
 
     elif location_type == "unknown":
-
-        if not is_filled(
-            location.get("building")
-        ):
-            missing.append(
-                "location.building"
-            )
-
-        if not is_filled(
-            location.get("floor")
-        ):
-            missing.append(
-                "location.floor"
-            )
 
         if not is_filled(
             location.get("area")
@@ -849,12 +734,6 @@ def get_next_question(
 
         return (
             "S'agit-il des toilettes hommes ou femmes ?"
-        )
-
-    if field == "location.office":
-
-        return (
-            "Quel est le numéro du bureau concerné ?"
         )
 
     # --------------------------------------------------------

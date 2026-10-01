@@ -1,8 +1,12 @@
+import { Bot } from "lucide-react";
+
 function ChatHeader() {
   return (
     <div className="chat-header">
       <div className="header-left">
-        <div className="bot-avatar">🤖</div>
+        <div className="bot-avatar">
+          <Bot size={24} />
+        </div>
 
         <div>
           <h2>Facility Assistant</h2>

@@ -4,7 +4,6 @@ from pydantic import BaseModel, Field
 
 
 class Employee(BaseModel):
-    employee_id: Optional[str] = None
     name: Optional[str] = None
     email: Optional[str] = None
 
@@ -24,12 +23,6 @@ class Equipment(BaseModel):
 
 
 class Location(BaseModel):
-    building: Optional[str] = None
-    floor: Optional[int] = None
-
-    # Bureau précis
-    office: Optional[str] = None
-
     # Département auquel appartient le lieu
     department: Optional[str] = None
 

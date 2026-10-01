@@ -34,7 +34,6 @@ def empty_data():
     return {
 
         "employee": {
-            "employee_id": None,
             "name": None,
             "email": None
         },
@@ -54,9 +53,6 @@ def empty_data():
         },
 
         "location": {
-            "building": None,
-            "floor": None,
-            "office": None,
             "department": None,
             "area": None,
             "specific_location": None,
@@ -425,43 +421,6 @@ def detect_subcategory(message: str, category: str):
     return None
 
 
-# ============================================================
-# EMPLOYEE ID
-# ============================================================
-
-def extract_employee_id(message: str):
-
-    patterns = [
-        r"\bEMP[-\s]?(\d+)\b",
-        r"\bemployee\s*id\s*[:\-]?\s*([A-Za-z0-9\-]+)",
-        r"\bmatricule\s*[:\-]?\s*([A-Za-z0-9\-]+)"
-    ]
-
-    for pattern in patterns:
-
-        match = re.search(
-            pattern,
-            message,
-            re.IGNORECASE
-        )
-
-        if match:
-
-            value = match.group(0)
-
-            # Si c'est EMP001
-            emp_match = re.search(
-                r"EMP[-\s]?(\d+)",
-                value,
-                re.IGNORECASE
-            )
-
-            if emp_match:
-                return f"EMP{emp_match.group(1)}"
-
-            return match.group(1).strip()
-
-    return None
 
 # ============================================================
 # EMAIL EMPLOYE
@@ -481,90 +440,6 @@ def extract_employee_email(message: str):
 
     return None
 
-
-def extract_building_answer(message: str):
-    """
-    Extrait un bâtiment même lorsque l'utilisateur répond
-    simplement : "A", "B", "bâtiment A", etc.
-    """
-
-    text = normalize_text(message).strip()
-
-    match = re.search(
-        r"\b(?:batiment|building|bloc)\s*[:\-]?\s*([a-z]|\d+)\b",
-        text
-    )
-
-    if match:
-        return match.group(1).upper()
-
-    # Réponse courte : A / B / C
-    if re.fullmatch(r"[a-z]", text):
-        return text.upper()
-
-    # Réponse courte : 1 / 2 / 3
-    if re.fullmatch(r"\d+", text):
-        return text
-
-    return None
-
-def extract_floor_answer(message: str):
-    text = normalize_text(message).strip()
-
-    # "2"
-    if re.fullmatch(r"\d+", text):
-        return int(text)
-
-    # "2ème", "2e", "2eme", "2 er"
-    match = re.fullmatch(
-        r"(\d+)\s*(?:er|ere|e|eme)?",
-        text
-    )
-
-    if match:
-        return int(match.group(1))
-
-    # "2ème étage"
-    floor = extract_floor(message)
-
-    if floor is not None:
-        return floor
-
-    # RDC
-    if text in [
-        "rdc",
-        "rez de chaussee",
-        "rez-de-chaussee"
-    ]:
-        return 0
-
-    # premier, deuxième...
-    for word, number in FLOOR_WORDS.items():
-        if text == word:
-            return number
-
-    return None
-
-def extract_office_answer(message: str):
-    text = normalize_text(message).strip()
-
-    # "bureau 204"
-    office = extract_office(message)
-
-    if office:
-        return office
-
-    # Réponse courte : "204", "B204", "204A"
-    match = re.fullmatch(
-        r"[a-z]?\d+[a-z]?",
-        text,
-        re.IGNORECASE
-    )
-
-    if match:
-        return match.group(0).upper()
-
-    return None
 
 def extract_area_answer(message: str):
     text = normalize_text(message).strip()
@@ -677,160 +552,6 @@ def extract_landmark(message: str):
             value = match.group(1).strip()
 
             return value.strip(" .,;:")
-
-    return None
-
-# ============================================================
-# BATIMENT
-# ============================================================
-
-def extract_building(message: str):
-
-    normalized = normalize_text(message)
-
-    patterns = [
-        r"\b(?:batiment|building|bloc)\s*([a-z]|\d+)\b",
-    ]
-
-    for pattern in patterns:
-
-        match = re.search(
-            pattern,
-            normalized,
-            re.IGNORECASE
-        )
-
-        if match:
-            return match.group(1).upper()
-
-    return None
-
-
-# ============================================================
-# ETAGE
-# ============================================================
-
-FLOOR_WORDS = {
-    "premier": 1,
-    "premiere": 1,
-    "deuxieme": 2,
-    "troisieme": 3,
-    "quatrieme": 4,
-    "cinquieme": 5,
-    "sixieme": 6,
-    "septieme": 7,
-    "huitieme": 8,
-    "neuvieme": 9,
-    "dixieme": 10
-}
-
-
-def extract_floor(message: str):
-
-    text = normalize_text(message)
-
-    # --------------------------------------------
-    # Exemple : étage 2
-    # --------------------------------------------
-
-    match = re.search(
-        r"\b(?:etage|floor)\s*(\d+)\b",
-        text
-    )
-
-    if match:
-        return int(match.group(1))
-
-    # --------------------------------------------
-    # Exemple : 2ème étage
-    # Exemple : 2e étage
-    # Exemple : 2 étage
-    # --------------------------------------------
-
-    match = re.search(
-        r"\b(\d+)\s*(?:er|ere|e|eme)?\s*(?:etage|floor)\b",
-        text
-    )
-
-    if match:
-        return int(match.group(1))
-
-    # --------------------------------------------
-    # Exemple : deuxième étage
-    # --------------------------------------------
-
-    for word, number in FLOOR_WORDS.items():
-
-        if re.search(
-            rf"\b{word}\s+(?:etage|floor)\b",
-            text
-        ):
-            return number
-
-    return None
-
-
-# ============================================================
-# BUREAU
-# ============================================================
-
-def extract_office(message: str):
-
-    text = normalize_text(message).strip()
-
-    # --------------------------------------------
-    # bureau 40
-    # office 40
-    # --------------------------------------------
-
-    pattern = (
-        r"\b(?:bureau|office)"
-        r"\s*(?:n[°o]?\s*)?"
-        r"([a-z]?\d+[a-z]?)\b"
-    )
-
-    match = re.search(
-        pattern,
-        text,
-        re.IGNORECASE
-    )
-
-    if match:
-        return match.group(1).upper()
-
-    # --------------------------------------------
-    # numéro 40
-    # numero 40
-    # n° 40
-    # n 40
-    # --------------------------------------------
-
-    pattern = (
-        r"\b(?:numero|num|n)"
-        r"\s*[°o]?\s*"
-        r"([a-z]?\d+[a-z]?)\b"
-    )
-
-    match = re.search(
-        pattern,
-        text,
-        re.IGNORECASE
-    )
-
-    if match:
-        return match.group(1).upper()
-
-    # --------------------------------------------
-    # Réponse uniquement numérique
-    # Exemple : "40"
-    # --------------------------------------------
-
-    if re.fullmatch(
-        r"[a-z]?\d+[a-z]?",
-        text,
-        re.IGNORECASE
-    ):
-        return text.upper()
 
     return None
 
@@ -964,9 +685,6 @@ def extract_location(message: str):
     text = normalize_text(message)
 
     result = {
-        "building": extract_building(message),
-        "floor": extract_floor(message),
-        "office": extract_office(message),
         "department": extract_department(message),
         "area": None,
         "specific_location": None,
@@ -1125,26 +843,11 @@ def extract_location(message: str):
         text
     ):
 
-        if result["office"] is None:
-
             result["area"] = "bureau"
 
             result["specific_location"] = "bureau"
-
-    # --------------------------------------------------------
-    # BUREAU NUMEROTE
-    # --------------------------------------------------------
-
-    if result["office"] is not None:
-
-        result["area"] = "bureau"
-
-        result["specific_location"] = (
-            f"bureau {result['office']}"
-        )
-
-    return result
-
+            
+    return result        
 
 # ============================================================
 # EQUIPEMENT
@@ -1219,17 +922,8 @@ def extract_rules(message: str, include_description=False):
     # DESCRIPTION
     # --------------------------------------------------------
 
-    if include_description:
+    if include_description and not is_generic_complaint(message):
         data["problem"]["description"] = message.strip()
-
-    # --------------------------------------------------------
-    # EMPLOYEE ID
-    # --------------------------------------------------------
-
-    employee_id = extract_employee_id(message)
-
-    if employee_id:
-        data["employee"]["employee_id"] = employee_id
 
     # --------------------------------------------------------
     # EMPLOYEE EMAIL
@@ -1263,10 +957,11 @@ def extract_rules(message: str, include_description=False):
 
     location = extract_location(message)
 
-    for key, value in location.items():
+    if isinstance(location, dict):
+        for key, value in location.items():
 
-        if value is not None:
-            data["location"][key] = value
+            if value is not None:
+                data["location"][key] = value
 
     # --------------------------------------------------------
     # EQUIPEMENT
@@ -1367,15 +1062,16 @@ def merge_protected(rule_data: dict, llm_data: dict):
 
         for key, value in source.items():
 
+            if key not in target:
+                continue
+
             if isinstance(value, dict):
 
-                if key not in target:
-                    target[key] = {}
-
-                merge(
-                    target[key],
-                    value
-                )
+                if isinstance(target.get(key), dict):
+                    merge(
+                        target[key],
+                        value
+                    )
 
             else:
 
@@ -1522,12 +1218,7 @@ Rules:
 
 - Never invent information.
 - Use null when information is missing.
-- Floor must be an integer.
-- Extract building only if explicitly mentioned.
-- Do not confuse building with area.
-- Do not confuse floor with specific_location.
 - "my office" / "mon bureau" means specific_location = "bureau".
-- "bureau 204" means office = "204" and specific_location = "bureau 204".
 - "women's restroom" means area = "restroom" and specific_location = "women's restroom".
 - "men's restroom" means area = "restroom" and specific_location = "men's restroom".
 - Do not determine priority.
@@ -1548,7 +1239,6 @@ Structure:
 
 {
     "employee": {
-        "employee_id": null,
         "name": null,
         "email": null
     },
@@ -1565,9 +1255,6 @@ Structure:
         "serial_number": null
     },
     "location": {
-        "building": null,
-        "floor": null,
-        "office": null,
         "department": null,
         "area": null,
         "specific_location": null,
@@ -1632,49 +1319,17 @@ def extract_answer(
     # --------------------------------------------------------
 
     rule_data = empty_data()
-    
+
     # ========================================================
     # EXTRACTION DIRECTE SELON LE CHAMP ATTENDU
     # ========================================================
 
-    if expected_field == "employee.employee_id":
-
-        value = extract_employee_id(message)
-
-        if value:
-            rule_data["employee"]["employee_id"] = value
-
-    elif expected_field == "employee.email":
+    if expected_field == "employee.email":
 
         value = extract_employee_email(message)
 
         if value:
             rule_data["employee"]["email"] = value
-
-    elif expected_field == "location.building":
-
-        value = extract_building_answer(message)
-
-        if value:
-            rule_data["location"]["building"] = value
-
-    elif expected_field == "location.floor":
-
-        value = extract_floor_answer(message)
-
-        if value is not None:
-            rule_data["location"]["floor"] = value
-
-    elif expected_field == "location.office":
-
-        value = extract_office_answer(message)
-
-        if value:
-            rule_data["location"]["office"] = value
-            rule_data["location"]["area"] = "bureau"
-            rule_data["location"]["specific_location"] = (
-                f"bureau {value}"
-            )
 
     elif expected_field == "location.area":
 
@@ -1691,7 +1346,6 @@ def extract_answer(
             rule_data["location"]["near_department"] = value
 
         else:
-            # Réponse courte : "Finance", "RH", etc.
             value = message.strip()
 
             if value:
@@ -1735,17 +1389,16 @@ def extract_answer(
 
         if value:
             rule_data["location"]["specific_location"] = value
-    
+
     elif expected_field == "location.department":
 
         value = message.strip()
 
         if value:
-
             rule_data["location"]["department"] = (
                 value.strip(" .,;:")
             )
-    
+
     elif expected_field == "location.restroom_type":
 
         text = normalize_text(message)
@@ -1786,7 +1439,7 @@ def extract_answer(
 
         value = message.strip()
 
-        if value:
+        if value and not is_generic_complaint(value):
             rule_data["problem"]["description"] = value
 
     elif expected_field == "problem.category":
@@ -1794,6 +1447,7 @@ def extract_answer(
         category = classify_category(message)
 
         if category:
+
             rule_data["problem"]["category"] = category
 
             subcategory = detect_subcategory(
@@ -1803,14 +1457,13 @@ def extract_answer(
 
             if subcategory:
                 rule_data["problem"]["subcategory"] = subcategory
-    
-    # --------------------------------------------------------
-    # Si la réponse est directement la description
-    # --------------------------------------------------------
 
-    if expected_field == "problem.description":
+            # La réponse peut également contenir la description
+            if not is_generic_complaint(message):
 
-        rule_data["problem"]["description"] = message.strip()
+                rule_data["problem"]["description"] = (
+                    message.strip()
+                )
 
     # --------------------------------------------------------
     # Si le champ attendu a été trouvé automatiquement
@@ -1874,18 +1527,18 @@ Your task:
 1. Extract the value for the expected field.
 2. Never invent information.
 3. Never replace an existing value with null.
-4. Convert floor numbers to integers.
-5. Do not modify unrelated existing information.
-6. Return valid JSON only.
+4. Do not modify unrelated existing information.
+5. Return valid JSON only.
 
 Important location rules:
 
-- "mon bureau" -> specific_location = "bureau"
-- "bureau 204" -> office = "204", specific_location = "bureau 204"
+- Never extract employee ID or matricule.
+- Never extract building.
+- Never extract floor.
+- Never extract office number.
+- These fields must not be returned.
 - "toilettes des femmes" -> area = "toilettes", specific_location = "toilettes des femmes"
 - "toilettes des hommes" -> area = "toilettes", specific_location = "toilettes des hommes"
-- "bâtiment A" -> building = "A"
-- "2ème étage" -> floor = 2
 - "près du département RH" -> near_department = "RH"
 - "près du bureau 204" -> near_office = "204"
 - "près de la cafétéria" -> landmark = "cafétéria"
@@ -1901,7 +1554,6 @@ Return this structure:
 
 {{
     "employee": {{
-        "employee_id": null,
         "name": null,
         "email": null
     }},
@@ -1918,9 +1570,6 @@ Return this structure:
         "serial_number": null
     }},
     "location": {{
-        "building": null,
-        "floor": null,
-        "office": null,
         "department": null,
         "area": null,
         "specific_location": null,

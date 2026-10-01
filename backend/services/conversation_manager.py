@@ -21,7 +21,6 @@ class ConversationManager:
         self.complaint = {
 
             "employee": {
-                "employee_id": None,
                 "name": None,
                 "email": None
             },
@@ -41,9 +40,6 @@ class ConversationManager:
             },
 
             "location": {
-                "building": None,
-                "floor": None,
-                "office": None,
                 "department": None,
                 "area": None,
                 "specific_location": None,
@@ -88,16 +84,17 @@ class ConversationManager:
 
         for key, value in source.items():
 
+            if key not in target:
+                continue
+
             if isinstance(value, dict):
 
-                if key not in target:
+                if isinstance(target.get(key), dict):
 
-                    target[key] = {}
-
-                self.merge_data(
-                    target[key],
-                    value
-                )
+                    self.merge_data(
+                        target[key],
+                        value
+                    )
 
             else:
 

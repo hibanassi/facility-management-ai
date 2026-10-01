@@ -1,4 +1,5 @@
 import { useRef, useState } from "react";
+import { Camera, Send } from "lucide-react";
 
 function ChatInput({ onSend, onPhotoSelect, photoRequired }) {
   const [message, setMessage] = useState("");
@@ -43,7 +44,7 @@ function ChatInput({ onSend, onPhotoSelect, photoRequired }) {
             onClick={handlePhotoClick}
             title="Ajouter une photo"
           >
-            +
+            <Camera size={20} />
           </button>
 
           <input
@@ -73,8 +74,9 @@ function ChatInput({ onSend, onPhotoSelect, photoRequired }) {
       <button
         type="submit"
         disabled={photoRequired}
+        title="Envoyer"
       >
-        ➤
+        <Send size={20} />
       </button>
 
     </form>

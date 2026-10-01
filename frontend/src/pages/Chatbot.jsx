@@ -231,7 +231,7 @@ function Chatbot() {
           id: Date.now(),
           sender: "bot",
           text:
-            "❌ Format non accepté. Veuillez sélectionner une image JPG, PNG ou WEBP.",
+            " Format non accepté. Veuillez sélectionner une image JPG, PNG ou WEBP.",
         },
       ]);
 
@@ -251,7 +251,7 @@ function Chatbot() {
           id: Date.now(),
           sender: "bot",
           text:
-            "❌ La photo est trop volumineuse. La taille maximale est de 5 MB.",
+            " La photo est trop volumineuse. La taille maximale est de 5 MB.",
         },
       ]);
 
@@ -265,7 +265,7 @@ function Chatbot() {
     const userPhotoMessage = {
       id: Date.now(),
       sender: "user",
-      text: `📷 ${file.name}`,
+      text: ` ${file.name}`,
     };
 
     setMessages((previous) => [
@@ -307,7 +307,7 @@ function Chatbot() {
         sender: "bot",
         text:
           data.message ||
-          "📷 Photo reçue avec succès.",
+          " Photo reçue avec succès.",
       };
 
       setMessages((previous) => [
@@ -335,7 +335,7 @@ function Chatbot() {
           id: Date.now() + 1,
           sender: "bot",
           text:
-            "❌ Impossible d'envoyer la photo. Veuillez réessayer.",
+            " Impossible d'envoyer la photo. Veuillez réessayer.",
         },
       ]);
 

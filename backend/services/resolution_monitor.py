@@ -8,8 +8,8 @@ def check_resolved_complaints():
     """
     Vérifie les réclamations dans Google Sheets.
 
-    Q = Status
-    R = Resolution Email Sent
+    N = Status
+    O = Resolution Email Sent
 
     Si :
         Status = RESOLVED
@@ -31,13 +31,13 @@ def check_resolved_complaints():
     for row_number, row in enumerate(rows[1:], start=2):
 
         # Éviter les problèmes si une ligne est incomplète
-        if len(row) < 18:
+        if len(row) < 15:
             continue
 
         complaint_id = row[0]       # A
-        employee_email = row[3]     # D
-        status = row[16].strip().upper()       # Q
-        email_sent = row[17].strip().upper()   # R
+        employee_email = row[2]     # D
+        status = row[13].strip().upper()       # Q
+        email_sent = row[14].strip().upper()   # R
 
         print(
             f"[MONITOR] {complaint_id} | "
@@ -71,12 +71,12 @@ def check_resolved_complaints():
                 # Colonne R = Resolution Email Sent
                 worksheet.update_cell(
                     row_number,
-                    18,
+                    15,
                     "YES"
                 )
 
                 print(
-                    f"Colonne R mise à YES pour "
+                    f"Colonne O mise à YES pour "
                     f"{complaint_id}"
                 )
 
